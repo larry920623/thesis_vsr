@@ -81,14 +81,14 @@ def main():
     train_loader = DataLoader(QRISPDatasetEDVR(qrisp_root, 'train', 5, 64), batch_size=4, shuffle=True, num_workers=4)
     val_loader = DataLoader(QRISPDatasetEDVR(qrisp_root, 'val', 5, 64), batch_size=1, shuffle=False, num_workers=2)
 
-    optimizer = optim.Adam(model.parameters(), lr=4e-4, betas=(0.9, 0.999))
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=150)
+    optimizer = optim.Adam(model.parameters(), lr=2e-4, betas=(0.9, 0.999))
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=300)
     criterion = CharbonnierLoss().to(device)
     
     best_val_loss = float('inf')
-    step_counter, tsa_iter = 0, 5000 
+    step_counter, tsa_iter = 0, 2000 
     
-    for epoch in range(150):
+    for epoch in range(300):
         model.train()
         epoch_loss = 0
         for batch_idx, (lr_seq, hr_center) in enumerate(train_loader):
@@ -104,11 +104,12 @@ def main():
             outputs = model(lr_seq)
             loss = criterion(outputs, hr_center)
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=50)
             optimizer.step()
             
             epoch_loss += loss.item()
             step_counter += 1
-            if batch_idx % 5 == 0: print(f"Epoch [{epoch+1}/150] Batch {batch_idx} | Loss: {loss.item():.6f}")
+            if batch_idx % 5 == 0: print(f"Epoch [{epoch+1}/300] Batch {batch_idx} | Loss: {loss.item():.6f}")
             
         scheduler.step()
         

@@ -204,6 +204,17 @@ class EDVRNet(nn.Module):
 
     def forward(self, x):
         n, t, c, h, w = x.size()
+        # 🚀 自動 Padding 機制：確保長寬永遠是 4 的倍數
+        pad_h = (4 - h % 4) % 4
+        pad_w = (4 - w % 4) % 4
+        if pad_h > 0 or pad_w > 0:
+            # 破解法：先降維成 4D (N*T, C, H, W)，讓 PyTorch 乖乖做事
+            x = x.view(-1, c, h, w)
+            x = F.pad(x, (0, pad_w, 0, pad_h), mode='replicate')
+            h, w = h + pad_h, w + pad_w # 更新內部計算用的新長寬
+            # 做完 Padding 後，再折疊回 5D (N, T, C, H, W)
+            x = x.view(n, t, c, h, w)
+
         x_center = x[:, self.center_frame_idx, :, :, :].contiguous()
 
         l1_feat = self.feature_extraction(self.lrelu(self.conv_first(x.view(-1, c, h, w))))
@@ -218,4 +229,7 @@ class EDVRNet(nn.Module):
 
         feat = self.fusion(aligned_feat) if self.with_tsa else self.fusion(aligned_feat.view(n, -1, h, w))
         out = self.conv_last(self.lrelu(self.conv_hr(self.lrelu(self.upsample2(self.lrelu(self.upsample1(self.reconstruction(feat))))))))
-        return out + self.img_upsample(x_center)
+        # 🚀 裁切回原始解析度 (記得要乘上放大倍率 4)
+        if pad_h > 0 or pad_w > 0:
+            out = out[:, :, : (h - pad_h) * 4, : (w - pad_w) * 4]
+        return out

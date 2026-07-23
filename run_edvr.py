@@ -36,9 +36,16 @@ def main():
     
     print(f"🚀 執行滑動視窗推論 (總幀數: {len(imgs)})...")
     
+    # --- 硬體效能與運算量評估 ---
+    total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"🧠 模型參數數量 (Parameters): {total_params / 1e6:.2f} M")
+    
+    print("🧮 正在估算 FLOPs...")
+    # EDVR 輸入為 5 幀，但只輸出 1 幀。因此跑一次 forward 的 MACs 即為生成單幀的運算量
     dummy_input = torch.zeros(1, 5, 3, imgs[0].shape[0], imgs[0].shape[1]).to(device)
     macs, _ = profile(model, inputs=(dummy_input, ), verbose=False)
-    print(f"⚡ 單幀運算量 (FLOPs/Frame): {(macs * 2) / 1e9:.2f} G")
+    flops_per_frame = (macs * 2) / 1e9
+    print(f"⚡ 單幀運算量 (FLOPs/Frame): {flops_per_frame:.2f} G")
     
     outputs_list = []
     start_event, end_event = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
@@ -55,8 +62,16 @@ def main():
         torch.cuda.synchronize()
 
     outputs = torch.stack(outputs_list, dim=1) # 合併成 [1, 10, 3, 1080, 1920]
+    
+    # --- 執行速度計算 ---
     runtime_ms = start_event.elapsed_time(end_event)
-    print(f"⏱️ 執行速度: 總耗時 {runtime_ms:.2f} ms | FPS: {1000.0 / (runtime_ms / len(imgs)):.2f}")
+    ms_per_frame = runtime_ms / len(imgs)
+    fps = 1000.0 / ms_per_frame
+    
+    print(f"⏱️ 執行速度:")
+    print(f"   - 總耗時 ({len(imgs)} 幀): {runtime_ms:.2f} ms")
+    print(f"   - 單幀耗時: {ms_per_frame:.2f} ms")
+    print(f"   - FPS: {fps:.2f}")
     
     outputs_np = outputs.squeeze(0).permute(0, 2, 3, 1).cpu().numpy()
     for i, out_img in enumerate(outputs_np):
@@ -68,15 +83,16 @@ def main():
         gts = torch.from_numpy(np.stack([cv2.cvtColor(cv2.imread(p), cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0 for p in gt_paths])).permute(0, 3, 1, 2).unsqueeze(0).to(device)
         psnr_fn, ssim_fn, lpips_fn = PeakSignalNoiseRatio(data_range=1.0).to(device), StructuralSimilarityIndexMeasure(data_range=1.0).to(device), lpips.LPIPS(net='alex').to(device)
         
-        total_psnr, total_ssim, total_lpips, total_std = 0, 0, 0, 0
+        total_psnr, total_ssim, total_lpips, total_std, total_std_gt = 0, 0, 0, 0, 0
         for i in range(len(imgs)):
             out_f, gt_f = outputs[:, i], gts[:, i]
+            std_gt = gt_f.std().item()
             p, s, l, st = psnr_fn(out_f, gt_f).item(), ssim_fn(out_f, gt_f).item(), lpips_fn(out_f * 2.0 - 1.0, gt_f * 2.0 - 1.0).item(), out_f.std().item()
-            print(f"Frame {i:02d} | PSNR: {p:.2f} dB, SSIM: {s:.4f}, LPIPS: {l:.4f}, Std: {st:.4f}")
-            total_psnr += p; total_ssim += s; total_lpips += l; total_std += st
+            print(f"Frame {i:02d} | PSNR: {p:.2f} dB, SSIM: {s:.4f}, LPIPS: {l:.4f}, Std: {st:.4f}, GT Std: {std_gt:.4f}")
+            total_psnr += p; total_ssim += s; total_lpips += l; total_std += st; total_std_gt += std_gt
         
         print("-" * 40)
-        print(f"🏆 序列平均 - PSNR: {total_psnr / len(imgs):.2f} dB, SSIM: {total_ssim / len(imgs):.4f}, LPIPS: {total_lpips / len(imgs):.4f}, Std: {total_std / len(imgs):.4f}")
+        print(f"🏆 序列平均 - PSNR: {total_psnr / len(imgs):.2f} dB, SSIM: {total_ssim / len(imgs):.4f}, LPIPS: {total_lpips / len(imgs):.4f}, Std: {total_std / len(imgs):.4f}, GT Std: {total_std_gt/ len(imgs):.4f}")
 
 if __name__ == '__main__':
     main()
