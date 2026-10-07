@@ -1,20 +1,14 @@
-# Python 暫存檔
 __pycache__/
 *.py[cod]
-*$py.class
-
-# 測試輸出的圖片與實驗數據
-experiments/
-*.png
-*.jpg
-*.mp4
-
-# 模型權重 (預防你不小心把 .pth 存在專案裡)
 *.pth
 *.pt
 *.ckpt
-
-# 開發工具設定
-.vscode/
-.idea/
-.DS_Store
+/backups/
+/datasets/
+/checkpoints/
+/experiments/
+/C2_Results_and_Report.zip
+/C2_Depth_Package.zip
+/Thesis_Folder_Cleanup.zip
+core
+core.*

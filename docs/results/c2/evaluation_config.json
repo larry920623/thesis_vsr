@@ -1,0 +1,21 @@
+{
+  "qrisp_root": "/home/larry/ssd_data/sr_project/datasets/QRISP",
+  "split": "test",
+  "num_frames": 10,
+  "max_sequences": null,
+  "c1_checkpoint": "/home/larry/ssd_data/sr_project/checkpoints/causal_basicvsrpp_mv/best_model.pth",
+  "c2_checkpoint": "/home/larry/ssd_data/sr_project/checkpoints/causal_basicvsrpp_mv_depth/best_model.pth",
+  "init_from_c1": false,
+  "depth_tau": null,
+  "gate_strength": null,
+  "output_dir": "/home/larry/ssd_data/sr_project/experiments/c2_depth_evaluation_quality",
+  "skip_runtime": true,
+  "skip_flops": true,
+  "warmup_repeats": 2,
+  "runtime_repeats": 3,
+  "expected_sequences": 44,
+  "effective_tau": 0.001,
+  "effective_gate_strength": 1.0,
+  "actual_c2_checkpoint": "/home/larry/ssd_data/sr_project/checkpoints/causal_basicvsrpp_mv_depth/best_model.pth",
+  "timing": "FP32 CUDA compute including depth confidence; excludes file IO/H2D; first frame excluded"
+}

@@ -1,0 +1,79 @@
+{
+  "torch_version": "2.1.2+cu118",
+  "checkpoints": [
+    {
+      "path": "/mnt/ssd1/larry/sr_project/checkpoints/causal_basicvsrpp_mv_depth/best_model.pth",
+      "ok": true,
+      "size_bytes": 41245326,
+      "sha256": "ae49e9bfe1c532494ec20c9cc8bf1f52e5e27ccab2adaf4891d0c2263760a2d8",
+      "epoch_zero_based": 11,
+      "saved_epoch_display": 12,
+      "best_val_loss": 0.012861043121665717,
+      "architecture": "CausalBasicVSRPlusPlusMVDepth",
+      "confidence_config": {
+        "depth_tau": 0.001,
+        "gate_strength": 1.0,
+        "depth_space": "qrisp_packed_zbuffer",
+        "depth_sampling": "nearest"
+      },
+      "training_protocol": {
+        "qrisp_root": "/home/larry/ssd_data/sr_project/datasets/QRISP",
+        "checkpoint_dir": "/home/larry/ssd_data/sr_project/checkpoints/causal_basicvsrpp_mv_depth",
+        "resume": null,
+        "init_c1": "/home/larry/ssd_data/sr_project/checkpoints/causal_basicvsrpp_mv/best_model.pth",
+        "depth_tau": 0.001,
+        "gate_strength": 1.0,
+        "max_train_batches": null,
+        "max_val_sequences": null,
+        "epochs": 30,
+        "num_frames": 15,
+        "patch_size": 64,
+        "batch_size": 4,
+        "num_workers": 4,
+        "lr": 2e-05,
+        "seed": 42
+      },
+      "has_optimizer": true,
+      "has_scheduler": true,
+      "num_model_tensors": 132,
+      "nonfinite_model_keys": []
+    },
+    {
+      "path": "/mnt/ssd1/larry/sr_project/checkpoints/causal_basicvsrpp_mv_depth/latest_checkpoint.pth",
+      "ok": true,
+      "size_bytes": 41249050,
+      "sha256": "1e55025ef05fb7e60e6e5f7915ef3e55e730a95535881b16e42f10965b143a49",
+      "epoch_zero_based": 27,
+      "saved_epoch_display": 28,
+      "best_val_loss": 0.012861043121665717,
+      "architecture": "CausalBasicVSRPlusPlusMVDepth",
+      "confidence_config": {
+        "depth_tau": 0.001,
+        "gate_strength": 1.0,
+        "depth_space": "qrisp_packed_zbuffer",
+        "depth_sampling": "nearest"
+      },
+      "training_protocol": {
+        "qrisp_root": "/home/larry/ssd_data/sr_project/datasets/QRISP",
+        "checkpoint_dir": "/home/larry/ssd_data/sr_project/checkpoints/causal_basicvsrpp_mv_depth",
+        "resume": null,
+        "init_c1": "/home/larry/ssd_data/sr_project/checkpoints/causal_basicvsrpp_mv/best_model.pth",
+        "depth_tau": 0.001,
+        "gate_strength": 1.0,
+        "max_train_batches": null,
+        "max_val_sequences": null,
+        "epochs": 30,
+        "num_frames": 15,
+        "patch_size": 64,
+        "batch_size": 4,
+        "num_workers": 4,
+        "lr": 2e-05,
+        "seed": 42
+      },
+      "has_optimizer": true,
+      "has_scheduler": true,
+      "num_model_tensors": 132,
+      "nonfinite_model_keys": []
+    }
+  ]
+}
